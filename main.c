@@ -34,12 +34,11 @@ int main(int argc, char* argv[])
 
   int memory[STRIP_LENGTH] = {0};
   int pointer = STRIP_LENGTH / 2;
-  int* loop_points[100] = {0};
-  int loop_point = 0;
-  int pc = 0;
+  long pc = 0;
 
   while (pc != length) {
     /* printf("%d %c\n", pc, filtered[pc]); */
+    /* printf("%ld %d", pc, memory[pointer]); */
     switch(filtered[pc]) {
     case '<':
       pointer--;
@@ -61,20 +60,29 @@ int main(int argc, char* argv[])
       memory[pointer] = ch;
       break;
     case '[':
-      int val = pc;
-      loop_points[loop_point++] = &val;
+      if (memory[pointer] == 0) { // skip the loop
+        int loop_counter = 1;
+        while (loop_counter != 0) {
+          pc++;
+          if (filtered[pc] == '[') loop_counter++;
+          if (filtered[pc] == ']') loop_counter--;
+        }
+      }
       break;
     case ']':
-      if (memory[pointer] != 0) {
-        pc = *loop_points[--loop_point]-1;
-      } else {
-        loop_point--;
+      if (memory[pointer] != 0) { // jump to start of the loop
+        int loop_counter = 1;
+        while (loop_counter != 0) {
+          pc--;
+          if (filtered[pc] == ']') loop_counter++;
+          if (filtered[pc] == '[') loop_counter--;
+        }
       }
-      
       break;
     default:
       break;
     }
+    /* printf("pc: %ld, memory[pointer]: %d\n", pc, memory[pointer]); */
     pc++;
   }
 
