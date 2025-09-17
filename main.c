@@ -21,7 +21,7 @@ int main(int argc, char* argv[])
   // Remove comments to process just the raw commands
   const char brain_chars[] = "<>+-.,[]";
   char filtered[BUFFER_LENGTH];
-  size_t length = 0;
+  int length = 0;
   
   int ch;
   while ((ch = fgetc(file)) != EOF && length < BUFFER_LENGTH - 1) {
@@ -32,5 +32,52 @@ int main(int argc, char* argv[])
 
   printf("%s\n", filtered);
 
+  int memory[STRIP_LENGTH] = {0};
+  int pointer = STRIP_LENGTH / 2;
+  int* loop_points[100] = {0};
+  int loop_point = 0;
+  int pc = 0;
+
+  while (pc != length) {
+    /* printf("%d %c\n", pc, filtered[pc]); */
+    switch(filtered[pc]) {
+    case '<':
+      pointer--;
+      break;
+    case '>':
+      pointer++;
+      break;
+    case '+':
+      memory[pointer]++;
+      break;
+    case '-':
+      memory[pointer]--;
+      break;
+    case '.':
+      printf("%c", (char)memory[pointer]);
+      break;
+    case ',':
+      int ch = getchar();
+      memory[pointer] = ch;
+      break;
+    case '[':
+      int val = pc;
+      loop_points[loop_point++] = &val;
+      break;
+    case ']':
+      if (memory[pointer] != 0) {
+        pc = *loop_points[--loop_point]-1;
+      } else {
+        loop_point--;
+      }
+      
+      break;
+    default:
+      break;
+    }
+    pc++;
+  }
+
+  printf("\n");
   return 0;
 }
